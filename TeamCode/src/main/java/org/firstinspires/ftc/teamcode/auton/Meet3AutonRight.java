@@ -87,6 +87,7 @@ public class Meet3AutonRight extends LinearOpMode
 
         backright.setDirection(DcMotorSimple.Direction.REVERSE);
         frontright.setDirection(DcMotorSimple.Direction.REVERSE);
+        slide.setDirection(DcMotorSimple.Direction.REVERSE);
 
         backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -179,20 +180,23 @@ public class Meet3AutonRight extends LinearOpMode
 
 
         //Raise up to avoid cone interference
-        //moveSlide(200);
+        moveSlide(200);
         //align bot
         Drive(150, .4, Math.toRadians(180));
+        sleep(250);
         //drive forward
         Drive(1800,.4,Math.toRadians(90));
         sleep(250);
         Drive(450,.4,Math.toRadians(270));
+        sleep(250);
         //Strafe Left to middle junction
-        Drive(575, .4, Math.toRadians(180));
+        Drive(625, .4, Math.toRadians(180));
         //Raise slide to middle junction
-        //moveSlide(3000);
+        moveSlide(3000);
+        sleep(250);
         sleep(250);
         //aproach middle junction
-        Drive(200,.4,Math.toRadians(90));
+        Drive(130,.4,Math.toRadians(90));
         sleep(500);
         //drop cone
         openClaw();
@@ -201,7 +205,7 @@ public class Meet3AutonRight extends LinearOpMode
         Drive(150,.4,Math.toRadians(270));
         closeClaw();
         //lower slide
-        //moveSlide(0);
+        moveSlide(0);
         sleep(500);
         //go to parking spot
         if(tagOfInterest == null ||tagOfInterest.id == middle) {
