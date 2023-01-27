@@ -206,9 +206,8 @@ public class Meet3AutonLeft extends LinearOpMode
         //align bot
         Drive(150, .4, Math.toRadians(0));
         //drive forward
-        Drive(1775,.4,Math.toRadians(90));
+        Drive(1550,.4,Math.toRadians(90));
         sleep(250);
-        telemetry.log().add("going backwards");
         Drive(450,.4,Math.toRadians(270));
         //Strafe RIGHT to middle junction
         Drive(600, .4, Math.toRadians(0));
