@@ -185,7 +185,7 @@ public class Meet3AutonRight extends LinearOpMode
         Drive(150, .4, Math.toRadians(180));
         sleep(250);
         //drive forward
-        Drive(1800,.4,Math.toRadians(90));
+        Drive(1650,.4,Math.toRadians(90));
         sleep(250);
         Drive(450,.4,Math.toRadians(270));
         sleep(250);
