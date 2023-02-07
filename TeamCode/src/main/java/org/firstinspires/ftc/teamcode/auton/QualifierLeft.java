@@ -36,8 +36,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "Meet 3 Auton Left")
-public class Meet3AutonLeft extends LinearOpMode
+@Autonomous(name = "QualifierLeft Auton")
+public class QualifierLeft extends LinearOpMode
 {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -69,6 +69,7 @@ public class Meet3AutonLeft extends LinearOpMode
 
     private Servo leftClaw;
     private Servo rightClaw;
+
 
 
     @Override
@@ -107,7 +108,7 @@ public class Meet3AutonLeft extends LinearOpMode
 
         backright.setDirection(DcMotorSimple.Direction.REVERSE);
         frontright.setDirection(DcMotorSimple.Direction.REVERSE);
-       // slide.setDirection(DcMotorSimple.Direction.REVERSE);
+//        slide.setDirection(DcMotorSimple.Direction.REVERSE);
 
         backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -118,6 +119,17 @@ public class Meet3AutonLeft extends LinearOpMode
         telemetry.log().add("This was built");
 
         closeClaw();
+
+        //while (!gamepad1.right_bumper&& !gamepad1.left_bumper && opModeIsActive()) {
+            //if (gamepad1.left_bumper){
+                //utonDirection = LEFT;
+                //telemetry.log().add("Auton Mode: Left");
+
+            //if (gamepad1.right_bumper) {
+               // AutonDirection = RIGHT;
+                // telemetry.log().add("Auton Mode: Right");
+
+
         /*
          * The INIT-loop:
          * This REPLACES waitForStart!
@@ -200,49 +212,48 @@ public class Meet3AutonLeft extends LinearOpMode
             telemetry.update();
         }
 
+            //Raise up to avoid cone interference
+            moveSlide(100);
+            //align bot
+            Drive(150, .4, Math.toRadians(0));
+            //drive forward
+            Drive(1550,.4,Math.toRadians(90));
+            sleep(250);
+            Drive(450,.4,Math.toRadians(270));
+            //Strafe RIGHT to middle junction
+            Drive(600, .4, Math.toRadians(0));
+            //Raise slide to middle junction
+            moveSlide(2150);
+            sleep(250);
+            //aproach middle junction
+            Drive(200,.4,Math.toRadians(90));
+            sleep(500);
+            //drop cone
+            openClaw();
+            sleep(500);
+            //backup
+            Drive(150,.4,Math.toRadians(270));
+            closeClaw();
+            //lower slide
+            moveSlide(500);
+            sleep(500);
+            //go to parking spot
+            if(tagOfInterest == null ||tagOfInterest.id == middle) {
+                //trajectory
+                Drive(600,.4,Math.toRadians(180));
+                sleep(1000);
+            }
+            else if(tagOfInterest.id == right) {
+                //trajectory
+                Drive(600,.4,Math.toRadians(0));
+                sleep(1000);
+            }
 
-        //Raise up to avoid cone interference
-        moveSlide(200);
-        //align bot
-        Drive(150, .4, Math.toRadians(0));
-        //drive forward
-        Drive(1550,.4,Math.toRadians(90));
-        sleep(250);
-        Drive(450,.4,Math.toRadians(270));
-        //Strafe RIGHT to middle junction
-        Drive(600, .4, Math.toRadians(0));
-        //Raise slide to middle junction
-        moveSlide(3000);
-        sleep(250);
-        //aproach middle junction
-        Drive(200,.4,Math.toRadians(90));
-        sleep(500);
-        //drop cone
-        openClaw();
-        sleep(500);
-        //backup
-        Drive(150,.4,Math.toRadians(270));
-        closeClaw();
-        //lower slide
-        moveSlide(0);
-        sleep(500);
-        //go to parking spot
-        if(tagOfInterest == null ||tagOfInterest.id == middle) {
-            //trajectory
-            Drive(600,.4,Math.toRadians(180));
-            sleep(1000);
-        }
-        else if(tagOfInterest.id == right) {
-            //trajectory
-            Drive(600,.4,Math.toRadians(0));
-            sleep(1000);
-        }
-
-        else if(tagOfInterest.id == left) {
-            //trajectory
-            Drive(1800, .4, Math.toRadians(180));
-            sleep(1000);
-        }
+            else if(tagOfInterest.id == left) {
+                //trajectory
+                Drive(1800, .4, Math.toRadians(180));
+                sleep(1000);
+            }
 
     }
     private void Drive(double position, double power, double angle) {
@@ -293,11 +304,11 @@ public class Meet3AutonLeft extends LinearOpMode
     }
 
     void closeClaw () {
-        leftClaw.setPosition(.1);
+        leftClaw.setPosition(.2);
         rightClaw.setPosition(.65);
     }
     void openClaw () {
-        leftClaw.setPosition(.25);
+        leftClaw.setPosition(.35);
         rightClaw.setPosition(.4);
     }
     void moveSlide(int position) {
