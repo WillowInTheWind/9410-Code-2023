@@ -108,8 +108,9 @@ public class QualifierLeft extends LinearOpMode
 
         backright.setDirection(DcMotorSimple.Direction.REVERSE);
         frontright.setDirection(DcMotorSimple.Direction.REVERSE);
-//        slide.setDirection(DcMotorSimple.Direction.REVERSE);
+//        slide.setDirection(DcMotorSimple.Direction.REVERSE)
 
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -215,24 +216,24 @@ public class QualifierLeft extends LinearOpMode
             //Raise up to avoid cone interference
             moveSlide(100);
             //align bot
-            Drive(150, .4, Math.toRadians(0));
+            Drive(1300, .4, Math.toRadians(0));
+            sleep(250);
             //drive forward
-            Drive(1550,.4,Math.toRadians(90));
+            Drive(2300,.4,Math.toRadians(90));
             sleep(250);
-            Drive(450,.4,Math.toRadians(270));
-            //Strafe RIGHT to middle junction
-            Drive(600, .4, Math.toRadians(0));
+            //Strafe LEFT to middle junction
+            Drive(600, .4, Math.toRadians(180));
             //Raise slide to middle junction
-            moveSlide(2150);
+            moveSlide(2900);
             sleep(250);
-            //aproach middle junction
-            Drive(200,.4,Math.toRadians(90));
-            sleep(500);
+            Drive(50,.4,Math.toRadians(90));
+            sleep(250);
             //drop cone
             openClaw();
+            sleep(250);
+            Drive(50,.4,Math.toRadians(270));
             sleep(500);
             //backup
-            Drive(150,.4,Math.toRadians(270));
             closeClaw();
             //lower slide
             moveSlide(500);
