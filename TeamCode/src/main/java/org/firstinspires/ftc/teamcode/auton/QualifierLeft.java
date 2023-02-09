@@ -21,6 +21,8 @@
 
 package org.firstinspires.ftc.teamcode.auton;
 
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -110,7 +112,7 @@ public class QualifierLeft extends LinearOpMode
         frontright.setDirection(DcMotorSimple.Direction.REVERSE);
 //        slide.setDirection(DcMotorSimple.Direction.REVERSE)
 
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slide.setMode(STOP_AND_RESET_ENCODER);
         backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -215,23 +217,26 @@ public class QualifierLeft extends LinearOpMode
 
             //Raise up to avoid cone interference
             moveSlide(100);
+            Drive(50,.4, Math.toRadians(90));
             //align bot
             Drive(1300, .4, Math.toRadians(0));
             sleep(250);
             //drive forward
-            Drive(2300,.4,Math.toRadians(90));
+            Drive(2200,.4,Math.toRadians(90));
             sleep(250);
             //Strafe LEFT to middle junction
             Drive(600, .4, Math.toRadians(180));
             //Raise slide to middle junction
             moveSlide(2900);
             sleep(250);
-            Drive(50,.4,Math.toRadians(90));
+            Drive(100,.4,Math.toRadians(90));
+            moveSlide(2500, .2);
+            sleep(250);
             sleep(250);
             //drop cone
             openClaw();
             sleep(250);
-            Drive(50,.4,Math.toRadians(270));
+            Drive(100,.4,Math.toRadians(270));
             sleep(500);
             //backup
             closeClaw();
@@ -259,10 +264,10 @@ public class QualifierLeft extends LinearOpMode
     }
     private void Drive(double position, double power, double angle) {
 
-        backleft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backright.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontleft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontright.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backleft.setMode(STOP_AND_RESET_ENCODER);
+        backright.setMode(STOP_AND_RESET_ENCODER);
+        frontleft.setMode(STOP_AND_RESET_ENCODER);
+        frontright.setMode(STOP_AND_RESET_ENCODER);
 
 
         backleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

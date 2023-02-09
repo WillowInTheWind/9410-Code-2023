@@ -36,8 +36,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "QualifierRight Auton")
-public class QualifierRight extends LinearOpMode
+@Autonomous(name = "QualifierRightCloser Auton")
+public class QualifierRightCloser extends LinearOpMode
 {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -218,12 +218,12 @@ public class QualifierRight extends LinearOpMode
             Drive(1000, .3, Math.toRadians(180));
             sleep(250);
             //drive forward
-            Drive(2200,.3,Math.toRadians(90));
+            Drive(1100,.3,Math.toRadians(90));
             sleep(250);
             //Drive(600,.4,Math.toRadians(270));
             sleep(250);
-            //Strafe Right to middle junction
-            Drive(500, .4, Math.toRadians(0));
+            //Strafe Left to middle junction
+            Drive(575, .4, Math.toRadians(180));
             sleep(250);
             //Raise slide to high junction
             moveSlide(2900);
@@ -238,7 +238,7 @@ public class QualifierRight extends LinearOpMode
             openClaw();
             sleep(500);
             //backup
-            Drive(150,.4,Math.toRadians(270));
+            Drive(100,.4,Math.toRadians(270));
             closeClaw();
             //lower slide
             moveSlide(500);
@@ -246,18 +246,18 @@ public class QualifierRight extends LinearOpMode
             //go to parking spot
             if(tagOfInterest == null ||tagOfInterest.id == middle) {
                 //trajectory
-                Drive(600,.4,Math.toRadians(0));
+                Drive(1700,.4,Math.toRadians(0));
                 sleep(1000);
             }
             else if(tagOfInterest.id == left) {
                 //trajectory
-                Drive(600,.4,Math.toRadians(180));
+                Drive(400,.4,Math.toRadians(0));
                 sleep(1000);
             }
 
             else if(tagOfInterest.id == right) {
                 //trajectory
-                Drive(1700, .4, Math.toRadians(0));
+                Drive(2900, .4, Math.toRadians(0));
                 sleep(1000);
             }
         }
