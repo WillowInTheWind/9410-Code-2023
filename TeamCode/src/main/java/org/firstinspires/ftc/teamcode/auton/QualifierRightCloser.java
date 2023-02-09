@@ -21,14 +21,18 @@
 
 package org.firstinspires.ftc.teamcode.auton;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -70,7 +74,8 @@ public class QualifierRightCloser extends LinearOpMode
     private Servo leftClaw;
     private Servo rightClaw;
 
-
+    IMU imu;
+    YawPitchRollAngles robotOrientation;
 
     @Override
     public void runOpMode()
@@ -117,6 +122,19 @@ public class QualifierRightCloser extends LinearOpMode
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         telemetry.log().add("This was built");
+        IMU.Parameters myIMUparameters;
+
+        myIMUparameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                )
+        );
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(myIMUparameters);
 
         closeClaw();
 
@@ -214,6 +232,7 @@ public class QualifierRightCloser extends LinearOpMode
             //Raise up to avoid cone interference
             moveSlide(100);
             Drive(50,.3,Math.toRadians(90));
+            sleep(500);
             //align bot
             Drive(1000, .3, Math.toRadians(180));
             sleep(250);
@@ -223,7 +242,7 @@ public class QualifierRightCloser extends LinearOpMode
             //Drive(600,.4,Math.toRadians(270));
             sleep(250);
             //Strafe Left to middle junction
-            Drive(575, .4, Math.toRadians(180));
+            Drive(625, .4, Math.toRadians(180));
             sleep(250);
             //Raise slide to high junction
             moveSlide(2900);
@@ -251,13 +270,13 @@ public class QualifierRightCloser extends LinearOpMode
             }
             else if(tagOfInterest.id == left) {
                 //trajectory
-                Drive(400,.4,Math.toRadians(0));
+                Drive(300,.4,Math.toRadians(0));
                 sleep(1000);
             }
 
             else if(tagOfInterest.id == right) {
                 //trajectory
-                Drive(2900, .4, Math.toRadians(0));
+                Drive(3100, .4, Math.toRadians(0));
                 sleep(1000);
             }
         }
@@ -275,14 +294,23 @@ public class QualifierRightCloser extends LinearOpMode
         frontleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        DriveAngle(angle, power);
         while (Math.abs(backleft.getCurrentPosition())<Math.abs(position) && opModeIsActive()) {
+            DriveAngle(angle, power);
             telemetry.addData("Target Position", position);
             telemetry.addData("Motor Position", backleft.getCurrentPosition());
+            telemetry.update();
         }
         stopRobot();
     }
+    void turn (double power){
+        backleft.setPower(power);
+        backright.setPower(-power);
+        frontleft.setPower(power);
+        frontright.setPower(-power);
+    }
+    void turn_to_angle (double angle, double power){
 
+    }
     public void stopRobot(){
         backleft.setPower(0);
         backright.setPower(0);
@@ -292,11 +320,13 @@ public class QualifierRightCloser extends LinearOpMode
 
     }
     private void DriveAngle(double angle, double speed) {
-        angle = angle - Math.toRadians(45);
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+        angle = angle - Math.toRadians(45)-robotOrientation.getYaw(AngleUnit.RADIANS);
         frontleft.setPower(speed * Math.cos(angle));
         backright.setPower(speed * Math.cos(angle));
         backleft.setPower(speed * Math.sin(angle));
         frontright.setPower(speed * Math.sin(angle));
+        telemetry.addData("Angle",Math.toDegrees(angle));
     }
     void tagToTelemetry(AprilTagDetection detection)
     {

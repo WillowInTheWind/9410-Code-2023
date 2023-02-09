@@ -21,14 +21,18 @@
 
 package org.firstinspires.ftc.teamcode.auton;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -70,7 +74,8 @@ public class QualifierRight extends LinearOpMode
     private Servo leftClaw;
     private Servo rightClaw;
 
-
+    IMU imu;
+    YawPitchRollAngles robotOrientation;
 
     @Override
     public void runOpMode()
@@ -115,7 +120,19 @@ public class QualifierRight extends LinearOpMode
         frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        IMU.Parameters myIMUparameters;
 
+        myIMUparameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                )
+        );
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(myIMUparameters);
         telemetry.log().add("This was built");
 
         closeClaw();
@@ -214,25 +231,26 @@ public class QualifierRight extends LinearOpMode
             //Raise up to avoid cone interference
             moveSlide(100);
             Drive(50,.3,Math.toRadians(90));
+            sleep(250);
             //align bot
             Drive(1000, .3, Math.toRadians(180));
             sleep(250);
             //drive forward
-            Drive(2200,.3,Math.toRadians(90));
+            Drive(2050,.3,Math.toRadians(90));
             sleep(250);
             //Drive(600,.4,Math.toRadians(270));
             sleep(250);
             //Strafe Right to middle junction
-            Drive(500, .4, Math.toRadians(0));
+            Drive(550, .4, Math.toRadians(0));
             sleep(250);
             //Raise slide to high junction
-            moveSlide(2900);
-            sleep(250);
-            //aproach middle junction
-            Drive(75,.4,Math.toRadians(90));
+            moveSlide(2950);
             stopRobot();
-            sleep(250);
-            moveSlide(2500,.2);
+            sleep(500);
+            //aproach middle junction
+            Drive(115,.4,Math.toRadians(90));
+            sleep(750);
+            moveSlide(2400,.2);
             sleep(500);
             //drop cone
             openClaw();
@@ -257,7 +275,7 @@ public class QualifierRight extends LinearOpMode
 
             else if(tagOfInterest.id == right) {
                 //trajectory
-                Drive(1700, .4, Math.toRadians(0));
+                Drive(1800, .4, Math.toRadians(0));
                 sleep(1000);
             }
         }
@@ -275,10 +293,13 @@ public class QualifierRight extends LinearOpMode
         frontleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        DriveAngle(angle, power);
         while (Math.abs(backleft.getCurrentPosition())<Math.abs(position) && opModeIsActive()) {
+            robotOrientation = imu.getRobotYawPitchRollAngles();
+            DriveAngle(angle-robotOrientation.getYaw(AngleUnit.RADIANS), power);
+            telemetry.addData("angle", robotOrientation.getYaw(AngleUnit.RADIANS));
             telemetry.addData("Target Position", position);
             telemetry.addData("Motor Position", backleft.getCurrentPosition());
+            telemetry.update();
         }
         stopRobot();
     }

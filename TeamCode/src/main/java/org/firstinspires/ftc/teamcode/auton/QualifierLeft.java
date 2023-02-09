@@ -23,14 +23,18 @@ package org.firstinspires.ftc.teamcode.auton;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -72,7 +76,8 @@ public class QualifierLeft extends LinearOpMode
     private Servo leftClaw;
     private Servo rightClaw;
 
-
+    IMU imu;
+    YawPitchRollAngles robotOrientation;
 
     @Override
     public void runOpMode()
@@ -118,7 +123,19 @@ public class QualifierLeft extends LinearOpMode
         frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        IMU.Parameters myIMUparameters;
 
+        myIMUparameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                )
+        );
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(myIMUparameters);
         telemetry.log().add("This was built");
 
         closeClaw();
@@ -277,8 +294,12 @@ public class QualifierLeft extends LinearOpMode
 
         DriveAngle(angle, power);
         while (Math.abs(backleft.getCurrentPosition())<Math.abs(position) && opModeIsActive()) {
+            robotOrientation = imu.getRobotYawPitchRollAngles();
+            DriveAngle(angle-robotOrientation.getYaw(AngleUnit.RADIANS), power);
+            telemetry.addData("angle", robotOrientation.getYaw(AngleUnit.RADIANS));
             telemetry.addData("Target Position", position);
             telemetry.addData("Motor Position", backleft.getCurrentPosition());
+            telemetry.update();
         }
         stopRobot();
     }
