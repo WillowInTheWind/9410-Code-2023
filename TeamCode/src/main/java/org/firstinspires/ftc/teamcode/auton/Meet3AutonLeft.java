@@ -22,6 +22,7 @@
 package org.firstinspires.ftc.teamcode.auton;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -109,6 +110,7 @@ public class Meet3AutonLeft extends LinearOpMode
         frontright.setDirection(DcMotorSimple.Direction.REVERSE);
        // slide.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -202,7 +204,7 @@ public class Meet3AutonLeft extends LinearOpMode
 
 
         //Raise up to avoid cone interference
-        moveSlide(200);
+        moveSlide(100,.4, true);
         //align bot
         Drive(150, .4, Math.toRadians(0));
         //drive forward
@@ -210,9 +212,9 @@ public class Meet3AutonLeft extends LinearOpMode
         sleep(250);
         Drive(450,.4,Math.toRadians(270));
         //Strafe RIGHT to middle junction
-        Drive(600, .4, Math.toRadians(0));
+        Drive(575, .4, Math.toRadians(0));
         //Raise slide to middle junction
-        moveSlide(3000);
+        moveSlide(2150,.4, true);
         sleep(250);
         //aproach middle junction
         Drive(200,.4,Math.toRadians(90));
@@ -224,7 +226,7 @@ public class Meet3AutonLeft extends LinearOpMode
         Drive(150,.4,Math.toRadians(270));
         closeClaw();
         //lower slide
-        moveSlide(0);
+        moveSlide(100,.4,true);
         sleep(500);
         //go to parking spot
         if(tagOfInterest == null ||tagOfInterest.id == middle) {
@@ -293,20 +295,21 @@ public class Meet3AutonLeft extends LinearOpMode
     }
 
     void closeClaw () {
-        leftClaw.setPosition(.1);
-        rightClaw.setPosition(.65);
+        leftClaw.setPosition(.2);
+        rightClaw.setPosition(.45);
     }
     void openClaw () {
         leftClaw.setPosition(.25);
-        rightClaw.setPosition(.4);
+        rightClaw.setPosition(.3);
     }
-    void moveSlide(int position) {
-        moveSlide(position, 1, true);
-    }
-    void moveSlide(int position,double power) {
-        moveSlide(position, power, true);
-    }
-    void moveSlide (int position,double power, boolean waitForCompletion) {
+//    void moveSlide(int position) {
+//        moveSlide(position, 1, true);
+//    }
+    //void moveSlide(int position, double power, boolean b) {
+        //moveSlide(position, power, true);
+    //}
+
+    void moveSlide (int position, double power, boolean waitForCompletion) {
         slide.setTargetPosition(position);
         slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         slide.setPower(power);

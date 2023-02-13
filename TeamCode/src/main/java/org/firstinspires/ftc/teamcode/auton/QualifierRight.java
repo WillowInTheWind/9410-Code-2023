@@ -23,6 +23,7 @@ package org.firstinspires.ftc.teamcode.auton;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -41,6 +42,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous(name = "QualifierRight Auton")
+@Disabled
 public class QualifierRight extends LinearOpMode
 {
     OpenCvCamera camera;
@@ -236,19 +238,20 @@ public class QualifierRight extends LinearOpMode
             Drive(1000, .3, Math.toRadians(180));
             sleep(250);
             //drive forward
-            Drive(2050,.3,Math.toRadians(90));
+            Drive(2075,.3,Math.toRadians(90));
             sleep(250);
             //Drive(600,.4,Math.toRadians(270));
             sleep(250);
             //Strafe Right to middle junction
-            Drive(550, .4, Math.toRadians(0));
+            Drive(600, .4, Math.toRadians(0));
             sleep(250);
             //Raise slide to high junction
             moveSlide(2950);
             stopRobot();
             sleep(500);
-            //aproach middle junction
-            Drive(115,.4,Math.toRadians(90));
+            //approach middle junction
+            Drive(135,.4,Math.toRadians(90));
+            stopRobot();
             sleep(750);
             moveSlide(2400,.2);
             sleep(500);
@@ -332,7 +335,7 @@ public class QualifierRight extends LinearOpMode
 
     void closeClaw () {
         leftClaw.setPosition(.2);
-        rightClaw.setPosition(.65);
+        rightClaw.setPosition(.45);
     }
     void openClaw () {
         leftClaw.setPosition(.35);

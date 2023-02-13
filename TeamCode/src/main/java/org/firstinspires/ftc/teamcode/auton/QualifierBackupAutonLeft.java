@@ -16,8 +16,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "Meet 3 Auton Right")
-public class Meet3AutonRight extends LinearOpMode
+@Autonomous(name = "Qualifier Auton backup")
+public class QualifierBackupAutonLeft extends LinearOpMode
 {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -84,7 +84,7 @@ public class Meet3AutonRight extends LinearOpMode
 
         leftClaw = hardwareMap.get(Servo.class, "left claw");
         rightClaw = hardwareMap.get(Servo.class, "right claw");
-
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backright.setDirection(DcMotorSimple.Direction.REVERSE);
         frontright.setDirection(DcMotorSimple.Direction.REVERSE);
         slide.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -180,48 +180,48 @@ public class Meet3AutonRight extends LinearOpMode
 
 
         //Raise up to avoid cone interference
-        moveSlide(200);
+        //moveSlide(200);
         //align bot
-        Drive(150, .4, Math.toRadians(180));
+        Drive(150, .4, Math.toRadians(0));
         sleep(250);
         //drive forward
         Drive(1650,.4,Math.toRadians(90));
         sleep(250);
         Drive(450,.4,Math.toRadians(270));
-        sleep(250);
-        //Strafe Left to middle junction
-        Drive(625, .4, Math.toRadians(180));
-        //Raise slide to middle junction
-        moveSlide(3000);
-        sleep(250);
-        sleep(250);
-        //aproach middle junction
-        Drive(130,.4,Math.toRadians(90));
-        sleep(500);
-        //drop cone
-        openClaw();
-        sleep(500);
-        //backup
-        Drive(150,.4,Math.toRadians(270));
-        closeClaw();
-        //lower slide
-        moveSlide(0);
-        sleep(500);
+        //Drive(450,.4,Math.toRadians(270));
+        //sleep(250);
+//        //Strafe Left to middle junction
+//        Drive(625, .4, Math.toRadians(180));
+//        //Raise slide to middle junction
+//        moveSlide(3000);
+//        sleep(250);
+//        sleep(250);
+//        //aproach middle junction
+//        Drive(130,.4,Math.toRadians(90));
+//        sleep(500);
+//        //drop cone
+//        openClaw();
+//        sleep(500);
+//        //backup
+//        Drive(150,.4,Math.toRadians(270));
+//        closeClaw();
+//        //lower slide
+//        moveSlide(0);
+//        sleep(500);
         //go to parking spot
         if(tagOfInterest == null ||tagOfInterest.id == middle) {
             //trajectory
-            Drive(600,.4,Math.toRadians(0));
             sleep(1000);
         }
         else if(tagOfInterest.id == left) {
             //trajectory
-            Drive(600,.4,Math.toRadians(180));
+            Drive(1300,.4,Math.toRadians(180));
             sleep(1000);
         }
 
         else if(tagOfInterest.id == right) {
             //trajectory
-            Drive(1800, .4, Math.toRadians(0));
+            Drive(1200, .4, Math.toRadians(0));
             sleep(1000);
         }
 
@@ -272,11 +272,11 @@ public class Meet3AutonRight extends LinearOpMode
     }
 
     void closeClaw () {
-        leftClaw.setPosition(.1);
-        rightClaw.setPosition(.65);
+        leftClaw.setPosition(.2);
+        rightClaw.setPosition(.45);
     }
     void openClaw () {
-        leftClaw.setPosition(.25);
+        leftClaw.setPosition(.35);
         rightClaw.setPosition(.4);
     }
     void moveSlide(int position) {

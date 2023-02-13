@@ -25,6 +25,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENC
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -43,6 +44,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous(name = "QualifierLeft Auton")
+@Disabled
 public class QualifierLeft extends LinearOpMode
 {
     OpenCvCamera camera;
@@ -231,22 +233,24 @@ public class QualifierLeft extends LinearOpMode
             telemetry.addLine("No tag snapshot available, it was never sighted during the init loop :(");
             telemetry.update();
         }
-
             //Raise up to avoid cone interference
             moveSlide(100);
             Drive(50,.4, Math.toRadians(90));
+            sleep(500);
             //align bot
-            Drive(1300, .4, Math.toRadians(0));
+            Drive(1250, .4, Math.toRadians(0));
             sleep(250);
             //drive forward
-            Drive(2200,.4,Math.toRadians(90));
+            Drive(2100,.4,Math.toRadians(90));
             sleep(250);
             //Strafe LEFT to middle junction
-            Drive(600, .4, Math.toRadians(180));
+            Drive(500, .4, Math.toRadians(180));
             //Raise slide to middle junction
-            moveSlide(2900);
+            moveSlide(2150);
             sleep(250);
-            Drive(100,.4,Math.toRadians(90));
+            Drive(135,.4,Math.toRadians(90));
+            stopRobot();
+            sleep(250);
             moveSlide(2500, .2);
             sleep(250);
             sleep(250);
@@ -274,9 +278,12 @@ public class QualifierLeft extends LinearOpMode
 
             else if(tagOfInterest.id == left) {
                 //trajectory
-                Drive(1800, .4, Math.toRadians(180));
+                Drive(1900, .4, Math.toRadians(180));
                 sleep(1000);
             }
+            Drive(300,.4,Math.toRadians(270));
+
+
 
     }
     private void Drive(double position, double power, double angle) {
@@ -331,12 +338,12 @@ public class QualifierLeft extends LinearOpMode
     }
 
     void closeClaw () {
-        leftClaw.setPosition(.2);
-        rightClaw.setPosition(.65);
+        leftClaw.setPosition(.25);
+        rightClaw.setPosition(.45);
     }
     void openClaw () {
         leftClaw.setPosition(.35);
-        rightClaw.setPosition(.4);
+        rightClaw.setPosition(.3);
     }
     void moveSlide(int position) {
         moveSlide(position, 1, true);
