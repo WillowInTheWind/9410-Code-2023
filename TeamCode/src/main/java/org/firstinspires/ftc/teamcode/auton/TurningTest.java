@@ -21,21 +21,20 @@
 
 package org.firstinspires.ftc.teamcode.auton;
 
-import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
-
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.MiniPID;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -43,8 +42,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "QualifierLeft Auton")
-public class QualifierLeft extends LinearOpMode
+@Autonomous(name = "TurningTest")
+public class TurningTest extends LinearOpMode
 {
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -78,27 +77,26 @@ public class QualifierLeft extends LinearOpMode
     private Servo rightClaw;
 
     IMU imu;
+    MiniPID miniPID;
     YawPitchRollAngles robotOrientation;
 
+    ElapsedTime runtime;
+
     @Override
-    public void runOpMode()
-    {
+    public void runOpMode() {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
 
         camera.setPipeline(aprilTagDetectionPipeline);
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
-            public void onOpened()
-            {
-                camera.startStreaming(800,448, OpenCvCameraRotation.UPRIGHT);
+            public void onOpened() {
+                camera.startStreaming(800, 448, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
-            public void onError(int errorCode)
-            {
+            public void onError(int errorCode) {
 
             }
         });
@@ -109,16 +107,15 @@ public class QualifierLeft extends LinearOpMode
         frontright = hardwareMap.get(DcMotor.class, "front right");
         backleft = hardwareMap.get(DcMotor.class, "back left");
         frontleft = hardwareMap.get(DcMotor.class, "front left");
-        slide = hardwareMap.get (DcMotor.class, "slide");
+        slide = hardwareMap.get(DcMotor.class, "slide");
 
         leftClaw = hardwareMap.get(Servo.class, "left claw");
         rightClaw = hardwareMap.get(Servo.class, "right claw");
 
         backright.setDirection(DcMotorSimple.Direction.REVERSE);
         frontright.setDirection(DcMotorSimple.Direction.REVERSE);
-//        slide.setDirection(DcMotorSimple.Direction.REVERSE)
-
-        slide.setMode(STOP_AND_RESET_ENCODER);
+//        slide.setDirection(DcMotorSimple.Direction.REVERSE);
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -132,78 +129,66 @@ public class QualifierLeft extends LinearOpMode
                         RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
                 )
         );
+        runtime =new ElapsedTime();
+
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(myIMUparameters);
+        imu.resetYaw();
         telemetry.log().add("This was built");
 
         closeClaw();
 
         //while (!gamepad1.right_bumper&& !gamepad1.left_bumper && opModeIsActive()) {
-            //if (gamepad1.left_bumper){
-                //utonDirection = LEFT;
-                //telemetry.log().add("Auton Mode: Left");
+        //if (gamepad1.left_bumper){
+        //utonDirection = LEFT;
+        //telemetry.log().add("Auton Mode: Left");
 
-            //if (gamepad1.right_bumper) {
-               // AutonDirection = RIGHT;
-                // telemetry.log().add("Auton Mode: Right");
+        //if (gamepad1.right_bumper) {
+        // AutonDirection = RIGHT;
+        // telemetry.log().add("Auton Mode: Right");
 
 
         /*
          * The INIT-loop:
          * This REPLACES waitForStart!
          */
-        while (!isStarted() && !isStopRequested())
-        {
+        while (!isStarted() && !isStopRequested()) {
             ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
 
-            if(currentDetections.size() != 0)
-            {
+            if (currentDetections.size() != 0) {
                 boolean tagFound = false;
 
-                for(AprilTagDetection tag : currentDetections)
-                {
-                    if(tag.id == left || tag.id == middle|| tag.id == right)
-                    {
+                for (AprilTagDetection tag : currentDetections) {
+                    if (tag.id == left || tag.id == middle || tag.id == right) {
                         tagOfInterest = tag;
                         tagFound = true;
                         break;
                     }
                 }
 
-                if(tagFound)
-                {
+                if (tagFound) {
                     telemetry.addLine("Tag of interest is in sight!\n\nLocation data:");
                     tagToTelemetry(tagOfInterest);
-                }
-                else
-                {
+                } else {
                     telemetry.addLine("Don't see tag of interest :(");
 
-                    if(tagOfInterest == null)
-                    {
+                    if (tagOfInterest == null) {
                         telemetry.addLine("(The tag has never been seen)");
-                    }
-                    else
-                    {
+                    } else {
                         telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
                         tagToTelemetry(tagOfInterest);
                     }
                 }
 
-            }
-            else
-            {
+            } else {
                 telemetry.addLine("Don't see tag of interest :(");
 
-                if(tagOfInterest == null)
-                {
+                if (tagOfInterest == null) {
                     telemetry.addLine("(The tag has never been seen)");
-                }
-                else
-                {
+                } else {
                     telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
                     tagToTelemetry(tagOfInterest);
                 }
@@ -219,78 +204,25 @@ public class QualifierLeft extends LinearOpMode
          * The START command just came in: now work off the latest snapshot acquired
          * during the init loop.
          */
+        TurnPID(90, 4);
 
         /* Update the telemetry */
-        if(tagOfInterest != null)
-        {
+        if (tagOfInterest != null) {
             telemetry.addLine("Tag snapshot:\n");
             tagToTelemetry(tagOfInterest);
             telemetry.update();
-        }
-        else
-        {
+        } else {
             telemetry.addLine("No tag snapshot available, it was never sighted during the init loop :(");
             telemetry.update();
         }
-            //Raise up to avoid cone interference
-            moveSlide(100);
-            Drive(50,.4, Math.toRadians(90));
-            sleep(500);
-            //align bot
-            Drive(1250, .4, Math.toRadians(0));
-            sleep(250);
-            //drive forward
-            Drive(2100,.4,Math.toRadians(90));
-            sleep(250);
-            //Strafe LEFT to middle junction
-            Drive(500, .4, Math.toRadians(180));
-            //Raise slide to middle junction
-            moveSlide(2150);
-            sleep(250);
-            Drive(135,.4,Math.toRadians(90));
-            stopRobot();
-            sleep(250);
-            moveSlide(2500, .2);
-            sleep(250);
-            sleep(250);
-            //drop cone
-            openClaw();
-            sleep(250);
-            Drive(100,.4,Math.toRadians(270));
-            sleep(500);
-            //backup
-            closeClaw();
-            //lower slide
-            moveSlide(500);
-            sleep(500);
-            //go to parking spot
-            if(tagOfInterest == null ||tagOfInterest.id == middle) {
-                //trajectory
-                Drive(600,.4,Math.toRadians(180));
-                sleep(1000);
-            }
-            else if(tagOfInterest.id == right) {
-                //trajectory
-                Drive(600,.4,Math.toRadians(0));
-                sleep(1000);
-            }
-
-            else if(tagOfInterest.id == left) {
-                //trajectory
-                Drive(1900, .4, Math.toRadians(180));
-                sleep(1000);
-            }
-            Drive(300,.4,Math.toRadians(270));
-
-
-
     }
+
     private void Drive(double position, double power, double angle) {
 
-        backleft.setMode(STOP_AND_RESET_ENCODER);
-        backright.setMode(STOP_AND_RESET_ENCODER);
-        frontleft.setMode(STOP_AND_RESET_ENCODER);
-        frontright.setMode(STOP_AND_RESET_ENCODER);
+        backleft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backright.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontleft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontright.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
         backleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -298,7 +230,6 @@ public class QualifierLeft extends LinearOpMode
         frontleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        DriveAngle(angle, power);
         while (Math.abs(backleft.getCurrentPosition())<Math.abs(position) && opModeIsActive()) {
             robotOrientation = imu.getRobotYawPitchRollAngles();
             DriveAngle(angle-robotOrientation.getYaw(AngleUnit.RADIANS), power);
@@ -318,6 +249,65 @@ public class QualifierLeft extends LinearOpMode
 
 
     }
+    public void turnLeft (double power) {
+        backleft.setPower(power);
+        backright.setPower(-power);
+        frontleft.setPower(power);
+        frontright.setPower(-power);
+    }
+    public void TurnPID(double angle, double seconds)
+    {
+        TurnPID(angle, seconds, -1);
+    }
+    public void TurnPID(double angle, double seconds, double motorPowerModifer)
+    {
+        motorPowerModifer=-Math.abs(motorPowerModifer); //make sure the robot will always go the right direction
+        MiniPID miniPID = new MiniPID(.01409, 0,0);
+//        double angleDiference=angle-getBotAngle(AngleUnit.DEGREES);
+//        if (Math.abs(angleDiference)>180) //make the angle difference less then 180 to remove unnecessary turning
+//        {
+//            angleDiference += (angleDiference >= 0) ? -360 : 360;
+//        }
+
+        miniPID.setOutputLimits(1);
+
+        miniPID.setSetpointRange(40);
+
+        double actual=0;
+        double output=0;
+//        telemetry.log().add("angle difference " + angleDiference);
+        double target=angle;
+        miniPID.setSetpoint(0);
+        miniPID.setSetpoint(target);
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds() < seconds) {
+
+            output = miniPID.getOutput(actual, target);
+            //if (angle>175 || angle <-175) actual = getBotAngle(AngleUnit.DEGREES);
+            //else actual = getBotAngle(AngleUnit.DEGREES);
+            actual = getBotAngle(AngleUnit.DEGREES);
+            turnLeft(output*motorPowerModifer);
+            //if (power>.07 || power <-.07) turnLeft(power/2); else turnLeft(power*1.3);
+            // if (power>.5 || power < -.5) turnLeft(power/2);
+            // else if (power > .1 || power <-.1) turnLeft(power);
+            // else turnLeft(.1*motorPowerModifer);
+            //outputTelemetry();
+            telemetry.addData("Angle", getBotAngle(AngleUnit.DEGREES));
+            telemetry.addData("output", output);
+            telemetry.addData("Actual", actual);
+            telemetry.addData("Target", target);
+            telemetry.update();
+        }
+        stopRobot();
+    }
+    public double getBotAngle () {
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+        return robotOrientation.getYaw(AngleUnit.RADIANS);
+    }
+    public double getBotAngle (AngleUnit unit) {
+    robotOrientation = imu.getRobotYawPitchRollAngles();
+    return robotOrientation.getYaw(unit);
+}
     private void DriveAngle(double angle, double speed) {
         angle = angle - Math.toRadians(45);
         frontleft.setPower(speed * Math.cos(angle));
@@ -337,12 +327,12 @@ public class QualifierLeft extends LinearOpMode
     }
 
     void closeClaw () {
-        leftClaw.setPosition(.25);
+        leftClaw.setPosition(.2);
         rightClaw.setPosition(.45);
     }
     void openClaw () {
         leftClaw.setPosition(.35);
-        rightClaw.setPosition(.3);
+        rightClaw.setPosition(.4);
     }
     void moveSlide(int position) {
         moveSlide(position, 1, true);

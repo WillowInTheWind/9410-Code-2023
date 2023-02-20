@@ -29,11 +29,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.MiniPID;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -42,7 +44,6 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous(name = "State Right Auton")
-@Disabled
 public class StateRight extends LinearOpMode
 {
     OpenCvCamera camera;
@@ -78,6 +79,10 @@ public class StateRight extends LinearOpMode
 
     IMU imu;
     YawPitchRollAngles robotOrientation;
+    MiniPID miniPID;
+    ElapsedTime runtime;
+
+
 
     @Override
     public void runOpMode()
@@ -101,7 +106,7 @@ public class StateRight extends LinearOpMode
 
             }
         });
-
+        runtime = new ElapsedTime();
         telemetry.setMsTransmissionInterval(50);
 
         backright = hardwareMap.get(DcMotor.class, "back right");
@@ -135,6 +140,7 @@ public class StateRight extends LinearOpMode
         // and named "imu".
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(myIMUparameters);
+        imu.resetYaw();
         telemetry.log().add("This was built");
 
         closeClaw();
@@ -232,39 +238,48 @@ public class StateRight extends LinearOpMode
         }
             //Raise up to avoid cone interference
             moveSlide(100);
-            Drive(50,.3,Math.toRadians(90));
+            Drive(50,.5,Math.toRadians(90));
+            sleep(250);
             sleep(250);
             //align bot
-            Drive(1000, .3, Math.toRadians(180));
+            Drive(1000, .5, Math.toRadians(180));
             sleep(250);
             //drive forward
-            Drive(2075,.3,Math.toRadians(90));
+            moveSlide(2800, .4, false);
+            Drive(2075,.5,Math.toRadians(90));
             sleep(250);
             //Drive(600,.4,Math.toRadians(270));
             sleep(250);
             //Strafe Right to middle junction
-            Drive(600, .4, Math.toRadians(0));
+            Drive(600, .5, Math.toRadians(0));
             sleep(250);
             //Raise slide to high junction
-            moveSlide(2950);
             stopRobot();
             sleep(500);
             //approach middle junction
-            Drive(135,.4,Math.toRadians(90));
-            stopRobot();
-            sleep(750);
-            moveSlide(2400,.2);
-            sleep(500);
-            //drop cone
+            Drive(50,.5,Math.toRadians(90));
+            moveSlide(2500, .4);
+            sleep(250);
             openClaw();
+            sleep(250);
+            moveSlide(2800, .4);
+            stopRobot();
+            //drop cone
             sleep(500);
-            //backup
-            Drive(150,.4,Math.toRadians(270));
+            TurnPID(-90, 2);
+            sleep(250);
+            moveSlide(450, .4,false);
+            Drive(1650,.4,Math.toRadians(0));
+            sleep(250);
             closeClaw();
-            //lower slide
-            moveSlide(500);
             sleep(500);
-            //go to parking spot
+            moveSlide(2800, .4, false);
+            sleep(250);
+            Drive(1600,.4,Math.toRadians(180));
+            sleep(250);
+            TurnPID(0, 2);
+            openClaw();
+        //go to parking spot
             if(tagOfInterest == null ||tagOfInterest.id == middle) {
                 //trajectory
                 Drive(600,.4,Math.toRadians(0));
@@ -272,16 +287,17 @@ public class StateRight extends LinearOpMode
             }
             else if(tagOfInterest.id == left) {
                 //trajectory
-                Drive(600,.4,Math.toRadians(180));
+                Drive(600,.7,Math.toRadians(180));
                 sleep(1000);
             }
 
             else if(tagOfInterest.id == right) {
                 //trajectory
-                Drive(1800, .4, Math.toRadians(0));
+                Drive(1800, .7, Math.toRadians(0));
                 sleep(1000);
             }
-        }
+            Drive(300,.4,Math.toRadians(270));
+      }
 
     private void Drive(double position, double power, double angle) {
 
@@ -315,6 +331,65 @@ public class StateRight extends LinearOpMode
 
 
     }
+    public void turnLeft (double power) {
+        backleft.setPower(power);
+        backright.setPower(-power);
+        frontleft.setPower(power);
+        frontright.setPower(-power);
+    }
+    public void TurnPID(double angle, double seconds)
+    {
+        TurnPID(angle, seconds, -1);
+    }
+    public void TurnPID(double angle, double seconds, double motorPowerModifer)
+    {
+        motorPowerModifer=-Math.abs(motorPowerModifer); //make sure the robot will always go the right direction
+        MiniPID miniPID = new MiniPID(.01409, 0,0);
+//        double angleDiference=angle-getBotAngle(AngleUnit.DEGREES);
+//        if (Math.abs(angleDiference)>180) //make the angle difference less then 180 to remove unnecessary turning
+//        {
+//            angleDiference += (angleDiference >= 0) ? -360 : 360;
+//        }
+
+        miniPID.setOutputLimits(1);
+
+        miniPID.setSetpointRange(40);
+
+        double actual=0;
+        double output=0;
+//        telemetry.log().add("angle difference " + angleDiference);
+        double target=angle;
+        miniPID.setSetpoint(0);
+        miniPID.setSetpoint(target);
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds() < seconds) {
+
+            output = miniPID.getOutput(actual, target);
+            //if (angle>175 || angle <-175) actual = getBotAngle(AngleUnit.DEGREES);
+            //else actual = getBotAngle(AngleUnit.DEGREES);
+            actual = getBotAngle(AngleUnit.DEGREES);
+            turnLeft(output*motorPowerModifer);
+            //if (power>.07 || power <-.07) turnLeft(power/2); else turnLeft(power*1.3);
+            // if (power>.5 || power < -.5) turnLeft(power/2);
+            // else if (power > .1 || power <-.1) turnLeft(power);
+            // else turnLeft(.1*motorPowerModifer);
+            //outputTelemetry();
+            telemetry.addData("Angle", getBotAngle(AngleUnit.DEGREES));
+            telemetry.addData("output", output);
+            telemetry.addData("Actual", actual);
+            telemetry.addData("Target", target);
+            telemetry.update();
+        }
+        stopRobot();
+    }
+    public double getBotAngle (AngleUnit angleUnit) {
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+        return robotOrientation.getYaw(angleUnit);
+    }
+    public double getBotAngle () {
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+        return robotOrientation.getYaw(AngleUnit.RADIANS);
+    }
     private void DriveAngle(double angle, double speed) {
         angle = angle - Math.toRadians(45);
         frontleft.setPower(speed * Math.cos(angle));
@@ -338,8 +413,8 @@ public class StateRight extends LinearOpMode
         rightClaw.setPosition(.45);
     }
     void openClaw () {
-        leftClaw.setPosition(.35);
-        rightClaw.setPosition(.4);
+        leftClaw.setPosition(.45);
+        rightClaw.setPosition(.3);
     }
     void moveSlide(int position) {
         moveSlide(position, 1, true);

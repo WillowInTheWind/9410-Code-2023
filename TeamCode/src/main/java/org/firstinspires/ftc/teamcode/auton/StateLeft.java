@@ -44,7 +44,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous(name = "State Left Auton")
-@Disabled
+
 public class StateLeft extends LinearOpMode
 {
     OpenCvCamera camera;
@@ -233,58 +233,60 @@ public class StateLeft extends LinearOpMode
             telemetry.addLine("No tag snapshot available, it was never sighted during the init loop :(");
             telemetry.update();
         }
-            //Raise up to avoid cone interference
-            moveSlide(100);
-            Drive(50,.4, Math.toRadians(90));
-            sleep(500);
-            //align bot
-            Drive(1250, .4, Math.toRadians(0));
-            sleep(250);
-            //drive forward
-            Drive(2100,.4,Math.toRadians(90));
-            sleep(250);
-            //Strafe LEFT to middle junction
-            Drive(500, .4, Math.toRadians(180));
-            //Raise slide to middle junction
-            moveSlide(2150);
-            sleep(250);
-            Drive(135,.4,Math.toRadians(90));
-            stopRobot();
-            sleep(250);
-            moveSlide(2500, .2);
-            sleep(250);
-            sleep(250);
-            //drop cone
-            openClaw();
-            sleep(250);
-            Drive(100,.4,Math.toRadians(270));
-            sleep(500);
-            //backup
-            closeClaw();
-            //lower slide
-            moveSlide(500);
-            sleep(500);
-            //go to parking spot
-            if(tagOfInterest == null ||tagOfInterest.id == middle) {
-                //trajectory
-                Drive(600,.4,Math.toRadians(180));
-                sleep(1000);
-            }
-            else if(tagOfInterest.id == right) {
-                //trajectory
-                Drive(600,.4,Math.toRadians(0));
-                sleep(1000);
-            }
+        //Raise up to avoid cone interference
+        moveSlide(100);
+        Drive(50,.5,Math.toRadians(90));
+        sleep(250);
+        sleep(250);
+        //align bot
+        Drive(1300, .5, Math.toRadians(0));
+        sleep(250);
+        //drive forward
+        moveSlide(2800, .4, false);
+        Drive(2075,.5,Math.toRadians(90));
+        sleep(250);
+        //Drive(600,.4,Math.toRadians(270));
+        sleep(250);
+        //Strafe Right to middle junction
+        Drive(600, .5, Math.toRadians(180));
+        sleep(250);
+        //Raise slide to high junction
+        stopRobot();
+        sleep(500);
+        //approach middle junction
+        Drive(150,.5,Math.toRadians(90));
+        moveSlide(2500, .4);
+        sleep(250);
+        openClaw();
+        sleep(250);
+        moveSlide(2800, .4);
+        stopRobot();
+        sleep(750);
+        //drop cone
+        sleep(500);
+        //backup
+        Drive(150,.4,Math.toRadians(270));
+        moveSlide(500, .4,false);
+        closeClaw();
+        //lower slide
+        sleep(500);
+        //go to parking spot
+        if(tagOfInterest == null ||tagOfInterest.id == middle) {
+            //trajectory
+            Drive(600,.4,Math.toRadians(180));
+            sleep(1000);
+        }
+        else if(tagOfInterest.id == left) {
+            //trajectory
+            Drive(600,.4,Math.toRadians(0));
+            sleep(1000);
+        }
 
-            else if(tagOfInterest.id == left) {
-                //trajectory
-                Drive(1900, .4, Math.toRadians(180));
-                sleep(1000);
-            }
-            Drive(300,.4,Math.toRadians(270));
-
-
-
+        else if(tagOfInterest.id == right) {
+            //trajectory
+            Drive(1800, .4, Math.toRadians(180));
+            sleep(1000);
+        }
     }
     private void Drive(double position, double power, double angle) {
 
@@ -310,7 +312,25 @@ public class StateLeft extends LinearOpMode
         }
         stopRobot();
     }
-
+    public void turn (double power) {
+        backleft.setPower(-power);
+        backright.setPower(power);
+        frontleft.setPower(-power);
+        frontright.setPower(power);
+    }
+    public void turntoangle (double power, double angle) {
+        turntoangle(power, angle, 10);
+    }
+    public void turntoangle (double power, double angle, double difference) {
+        double currentAngle = getBotAngle();
+        while (Math.abs(currentAngle - angle) < difference) {
+            currentAngle = getBotAngle();
+        }
+    }
+    public double getBotAngle () {
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+        return robotOrientation.getYaw(AngleUnit.RADIANS);
+    }
     public void stopRobot(){
         backleft.setPower(0);
         backright.setPower(0);
