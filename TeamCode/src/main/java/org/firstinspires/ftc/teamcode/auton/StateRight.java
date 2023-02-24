@@ -44,6 +44,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous(name = "State Right Auton")
+@Disabled
 public class StateRight extends LinearOpMode
 {
     OpenCvCamera camera;

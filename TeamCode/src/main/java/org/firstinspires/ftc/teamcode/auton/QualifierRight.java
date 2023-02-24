@@ -42,6 +42,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous(name = "QualifierRight Auton")
+@Disabled
 public class QualifierRight extends LinearOpMode
 {
     OpenCvCamera camera;

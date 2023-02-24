@@ -235,59 +235,10 @@ public class StateRightTriple extends LinearOpMode
             telemetry.addLine("No tag snapshot available, it was never sighted during the init loop :(");
             telemetry.update();
         }
-            //Raise up to avoid cone interference
-            moveSlide(100);
-            Drive(50,.5,Math.toRadians(90));
-            sleep(250);
-            //align bot
-            Drive(1000, .5, Math.toRadians(180));
-            sleep(500);
-            //drive forward
-            moveSlide(2800, .4, false);
-            Drive(2075,.5,Math.toRadians(90));
-            sleep(125);
-            //Drive(600,.4,Math.toRadians(270));
-            //Strafe Right to middle junction
-            Drive(600, .5, Math.toRadians(0));
-            sleep(125);
-            //Raise slide to high junction
-            stopRobot();
-            sleep(100);
-            //approach middle junction
-            Drive(50,.5,Math.toRadians(90));
-            moveSlide(2500, .4);
-            sleep(125);
-            openClaw();
-            sleep(125);
-            moveSlide(2800, .4);
-            stopRobot();
-            //drop cone
-            TurnPID(-90, 1.75);
-            //sleep(124);
-            moveSlide(400, .4,false);
-            Drive(1750,.4,Math.toRadians(0));
-            sleep(125);
-            closeClaw();
-            sleep(250);
-            moveSlide(2800, .4, false);
-            sleep(125);
-            Drive(1700,.4,Math.toRadians(180));
-            sleep(125);
-            TurnPID(0, 1.75);
-            openClaw();
-            sleep(125);
-            TurnPID(-90, 1.75);
-            moveSlide(350, .4,false);
-            Drive(1750,.4,Math.toRadians(0));
-            sleep(125);
-            closeClaw();
-            sleep(250);
-            moveSlide(2800, .4, false);
-            sleep(250);
-            Drive(1625,.6,Math.toRadians(180));
-            sleep(125);
-            TurnPID(0, 1.75);
-            openClaw();
+            Approach_High_Junction();
+            Place_Preload_cone();
+            Cycle_Cone_1();
+            Cycle_Cone_2();
         //go to parking spot
             if(tagOfInterest == null ||tagOfInterest.id == middle) {
                 //trajectory
@@ -300,7 +251,7 @@ public class StateRightTriple extends LinearOpMode
 
             else if(tagOfInterest.id == right) {
                 //trajectory
-                Drive(1300, 1, Math.toRadians(0));
+                Drive(1550, 1, Math.toRadians(0));
             }
             Drive(300,.4,Math.toRadians(270));
       }
@@ -402,6 +353,59 @@ public class StateRightTriple extends LinearOpMode
         backright.setPower(speed * Math.cos(angle));
         backleft.setPower(speed * Math.sin(angle));
         frontright.setPower(speed * Math.sin(angle));
+    }
+    void Approach_High_Junction () {
+        moveSlide(100);
+        Drive(50,.5,Math.toRadians(90));
+        sleep(250);
+        Drive(1000, .5, Math.toRadians(180));
+        sleep(500);
+        moveSlide(2800, .4, false);
+        Drive(2075,.5,Math.toRadians(90));
+        sleep(125);
+    }
+    void Cycle_Cone_1 (){
+        TurnPID(-90, 2);
+        //sleep(124);
+        moveSlide(400, .4,false);
+        Drive(1750,.4,Math.toRadians(0));
+        sleep(125);
+        closeClaw();
+        sleep(250);
+        moveSlide(2800, .4, false);
+        sleep(125);
+        Drive(1650,.4,Math.toRadians(180));
+        sleep(125);
+        TurnPID(0, 1.75);
+        openClaw();
+        sleep(125);
+    }
+    void Cycle_Cone_2 () {
+        TurnPID(-90, 1.75);
+        moveSlide(350, .4,false);
+        Drive(1750,.4,Math.toRadians(0));
+        sleep(125);
+        closeClaw();
+        sleep(250);
+        moveSlide(2800, .4, false);
+        sleep(250);
+        Drive(1650,.6,Math.toRadians(180));
+        sleep(125);
+        TurnPID(0, 1.75);
+        openClaw();
+    }
+    void Place_Preload_cone () {
+        Drive(600, .5, Math.toRadians(0));
+        sleep(125);
+        stopRobot();
+        sleep(100);
+        Drive(50,.5,Math.toRadians(90));
+        moveSlide(2500, .4);
+        sleep(125);
+        openClaw();
+        sleep(125);
+        moveSlide(2800, .4);
+        stopRobot();
     }
     void tagToTelemetry(AprilTagDetection detection)
     {

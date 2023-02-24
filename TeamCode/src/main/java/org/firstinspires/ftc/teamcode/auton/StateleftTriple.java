@@ -248,7 +248,7 @@ public class StateleftTriple extends LinearOpMode
             sleep(125);
             //Drive(600,.4,Math.toRadians(270));
             //Strafe Right to middle junction
-            Drive(550, .5, Math.toRadians(180));
+            Drive(600, .5, Math.toRadians(180));
             //Raise slide to high junction
             stopRobot();
             sleep(100);
@@ -264,12 +264,12 @@ public class StateleftTriple extends LinearOpMode
             TurnPID(90, 1.75);
             //sleep(124);
             moveSlide(400, .4,false);
-            Drive(1650,.4,Math.toRadians(180));
+            Drive(1550,.4,Math.toRadians(180));
             sleep(125);
             closeClaw();
             moveSlide(2800, .4, false);
             sleep(125);
-            Drive(1665,.4,Math.toRadians(0));
+            Drive(1550,.4,Math.toRadians(0));
             sleep(125);
             TurnPID(0, 1.75);
             Drive(50,.4,Math.toRadians(90));
@@ -277,13 +277,13 @@ public class StateleftTriple extends LinearOpMode
             sleep(125);
             TurnPID(90, 1.75);
             moveSlide(350, .4,false);
-            Drive(1650,.4,Math.toRadians(180));
+            Drive(1550,.4,Math.toRadians(180));
             sleep(125);
             closeClaw();
             sleep(250);
             moveSlide(2800, .4, false);
-            sleep(125);
-            Drive(1590,.7,Math.toRadians(0));
+            sleep(200);
+            Drive(1450,.7,Math.toRadians(0));
             sleep(125);
             TurnPID(0, 1.75);
             Drive(50,.4,Math.toRadians(90));
@@ -291,11 +291,11 @@ public class StateleftTriple extends LinearOpMode
         //go to parking spot
             if(tagOfInterest == null ||tagOfInterest.id == middle) {
                 //trajectory
-                Drive(400,1,Math.toRadians(180));
+                Drive(500,1,Math.toRadians(180));
             }
             else if(tagOfInterest.id == left) {
                 //trajectory
-                Drive(1200,1,Math.toRadians(180));
+                Drive(1800,1,Math.toRadians(180));
             }
 
             else if(tagOfInterest.id == right) {
